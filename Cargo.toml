@@ -1,10 +1,10 @@
 [package]
 name = "mix_vector"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A simple heterogeneous container for Rust"
 license = "MIT"
-repository = "https://github.com/w1n4a/Mix-Vector"
+repository = "https://github.com/w1n4a/mix_vector"
 
 [lib]
 path = "src/mix.rs"
