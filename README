@@ -1,0 +1,15 @@
+# mix_vector
+
+A simple, safe, and efficient heterogeneous container for Rust. It allows you to store multiple different data types inside a single vector using a robust `Types` enum.
+
+## Features
+
+- Supports all major primitive types (`u8`-`u128`, `i8`-`i128`, `f32`, `f64`, `usize`, `bool`).
+- Supports `String` and nested `Vec<Types>`.
+- Type-checking methods (`is_numeric`, `is_string`, etc.).
+- Safe unpacking with helper functions (`unwrap_int`, `expect_str`, etc.).
+
+## License
+
+Licensed under either of:
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org)
