@@ -29,16 +29,16 @@ pub trait IsTypes {
     fn is_vec(&self) -> bool;
 }
 
-pub trait UnTypes {
-    fn unwrap_int(&self) -> i128;
-    fn unwrap_uns(&self) -> u128;
-    fn unwrap_float(&self) -> f64;
-    fn unwrap_str(&self) -> String;
-    fn unwrap_bool(&self) -> bool;
-    fn unwrap_vec(&self) -> Vec<Types>;
+pub trait UnwrapTypes {
+    fn unwrap_int(&self) -> Result<i128, Types>;
+    fn unwrap_uns(&self) -> Result<u128, Types>;
+    fn unwrap_float(&self) -> Result<f64, Types>;
+    fn unwrap_str(&self) -> Result<String, Types>;
+    fn unwrap_bool(&self) -> Result<bool, Types>;
+    fn unwrap_vec(&self) -> Result<Vec<Types>, Types>;
 }
 
-pub trait ExTypes {
+pub trait ExpectTypes {
     fn expect_int(&self, msg: &str) -> i128;
     fn expect_uns(&self, msg: &str) -> u128;
     fn expect_float(&self, msg: &str) -> f64;
@@ -47,7 +47,7 @@ pub trait ExTypes {
     fn expect_vec(&self, msg: &str) -> Vec<Types>;
 }
 
-pub trait CvTypes {
+pub trait ConvertTypes {
     fn to_float(&self) -> Types;
     fn to_int(&self) -> Types;
     fn to_uns(&self) -> Types;
@@ -57,6 +57,103 @@ pub trait CvTypes {
 pub trait Get {
     fn get_types(&self, arg: &[usize]) -> Vec<Types>;
     fn get_type(&self, arg: usize) -> Types;
+}
+
+pub trait Math {
+    fn sum(&self) -> f64;
+    fn min(&self) -> f64;
+    fn mul(&self) -> f64;
+    fn dev(&self) -> f64;
+}
+
+impl Math for Vec<Types> {
+    fn sum(&self) -> f64 {
+        let mut res: f64 = 0.0;
+        for i in self {
+            match i {
+                Types::U8(x) => res += *x as f64,
+                Types::U16(x) => res += *x as f64,
+                Types::U32(x) => res += *x as f64,
+                Types::U64(x) => res += *x as f64,
+                Types::U128(x) => res += *x as f64,
+                Types::I8(x) => res += *x as f64,
+                Types::I16(x) => res += *x as f64,
+                Types::I32(x) => res += *x as f64,
+                Types::I64(x) => res += *x as f64,
+                Types::I128(x) => res += *x as f64,
+                Types::F32(x) => res += *x as f64,
+                Types::F64(x) => res += *x as f64,
+                _ => {}
+            }
+        }
+        res
+    }
+
+    fn min(&self) -> f64 {
+        let mut res: f64 = 1.0;
+        for i in self {
+            match i {
+                Types::U8(x) => res -= *x as f64,
+                Types::U16(x) => res -= *x as f64,
+                Types::U32(x) => res -= *x as f64,
+                Types::U64(x) => res -= *x as f64,
+                Types::U128(x) => res -= *x as f64,
+                Types::I8(x) => res -= *x as f64,
+                Types::I16(x) => res -= *x as f64,
+                Types::I32(x) => res -= *x as f64,
+                Types::I64(x) => res -= *x as f64,
+                Types::I128(x) => res -= *x as f64,
+                Types::F32(x) => res -= *x as f64,
+                Types::F64(x) => res -= *x as f64,
+                _ => {}
+            }
+        }
+        res
+    }
+
+    fn mul(&self) -> f64 {
+        let mut res: f64 = 1.0;
+        for i in self {
+            match i {
+                Types::U8(x) => res *= *x as f64,
+                Types::U16(x) => res *= *x as f64,
+                Types::U32(x) => res *= *x as f64,
+                Types::U64(x) => res *= *x as f64,
+                Types::U128(x) => res *= *x as f64,
+                Types::I8(x) => res *= *x as f64,
+                Types::I16(x) => res *= *x as f64,
+                Types::I32(x) => res *= *x as f64,
+                Types::I64(x) => res *= *x as f64,
+                Types::I128(x) => res *= *x as f64,
+                Types::F32(x) => res *= *x as f64,
+                Types::F64(x) => res *= *x as f64,
+                _ => {}
+            }
+        }
+        res
+    }
+
+    fn dev(&self) -> f64 {
+        let mut res: f64 = 1.0;
+        for i in self {
+            match i {
+                Types::U8(x) => res /= *x as f64,
+                Types::U16(x) => res /= *x as f64,
+                Types::U32(x) => res /= *x as f64,
+                Types::U64(x) => res /= *x as f64,
+                Types::U128(x) => res /= *x as f64,
+                Types::I8(x) => res /= *x as f64,
+                Types::I16(x) => res /= *x as f64,
+                Types::I32(x) => res /= *x as f64,
+                Types::I64(x) => res /= *x as f64,
+                Types::I128(x) => res /= *x as f64,
+                Types::F32(x) => res /= *x as f64,
+                Types::F64(x) => res /= *x as f64,
+                _ => {}
+            }
+        }
+        res
+    }
 }
 
 impl Get for Vec<Types> {
@@ -116,7 +213,7 @@ impl Get for Vec<Types> {
     }
 }
 
-impl CvTypes for Types {
+impl ConvertTypes for Types {
     fn to_float(&self) -> Types {
         match self {
             Types::U8(x) => Types::F64(*x as f64),
@@ -231,87 +328,84 @@ impl IsTypes for Types {
     }
 }
 
-impl UnTypes for Types {
-    fn unwrap_int(&self) -> i128 {
+impl UnwrapTypes for Types {
+    fn unwrap_int(&self) -> Result<i128, Types> {
         match self {
-            Types::U8(x) => *x as i128,
-            Types::U16(x) => *x as i128,
-            Types::U32(x) => *x as i128,
-            Types::U64(x) => *x as i128,
-            Types::U128(x) => *x as i128,
-            Types::I8(x) => *x as i128,
-            Types::I16(x) => *x as i128,
-            Types::I32(x) => *x as i128,
-            Types::I64(x) => *x as i128,
-            Types::I128(x) => *x as i128,
-            Types::F32(x) => *x as i128,
-            Types::F64(x) => *x as i128,
-            Types::Usize(x) => *x as i128,
-            _ => panic!("Invalid Type"),
+            Types::U8(x) => Ok(*x as i128),
+            Types::U16(x) => Ok(*x as i128),
+            Types::U32(x) => Ok(*x as i128),
+            Types::U64(x) => Ok(*x as i128),
+            Types::U128(x) => Ok(*x as i128),
+            Types::I8(x) => Ok(*x as i128),
+            Types::I16(x) => Ok(*x as i128),
+            Types::I64(x) => Ok(*x as i128),
+            Types::I128(x) => Ok(*x as i128),
+            Types::F32(x) => Ok(*x as i128),
+            Types::F64(x) => Ok(*x as i128),
+            Types::Usize(x) => Ok(*x as i128),
+            _ => Err(Types::None),
         }
     }
 
-    fn unwrap_uns(&self) -> u128 {
+    fn unwrap_uns(&self) -> Result<u128, Types> {
         match self {
-            Types::U8(x) => *x as u128,
-            Types::U16(x) => *x as u128,
-            Types::U32(x) => *x as u128,
-            Types::U64(x) => *x as u128,
-            Types::U128(x) => *x as u128,
-            Types::I8(x) => *x as u128,
-            Types::I16(x) => *x as u128,
-            Types::I32(x) => *x as u128,
-            Types::I64(x) => *x as u128,
-            Types::I128(x) => *x as u128,
-            Types::F32(x) => *x as u128,
-            Types::F64(x) => *x as u128,
-            Types::Usize(x) => *x as u128,
-            _ => panic!("Invalid Type"),
+            Types::U8(x) => Ok(*x as u128),
+            Types::U16(x) => Ok(*x as u128),
+            Types::U32(x) => Ok(*x as u128),
+            Types::U64(x) => Ok(*x as u128),
+            Types::U128(x) => Ok(*x as u128),
+            Types::I8(x) => Ok(*x as u128),
+            Types::I16(x) => Ok(*x as u128),
+            Types::I64(x) => Ok(*x as u128),
+            Types::I128(x) => Ok(*x as u128),
+            Types::F32(x) => Ok(*x as u128),
+            Types::F64(x) => Ok(*x as u128),
+            Types::Usize(x) => Ok(*x as u128),
+            _ => Err(Types::None),
         }
     }
 
-    fn unwrap_float(&self) -> f64 {
+    fn unwrap_float(&self) -> Result<f64, Types> {
         match self {
-            Types::U8(x) => *x as f64,
-            Types::U16(x) => *x as f64,
-            Types::U32(x) => *x as f64,
-            Types::U64(x) => *x as f64,
-            Types::U128(x) => *x as f64,
-            Types::I8(x) => *x as f64,
-            Types::I16(x) => *x as f64,
-            Types::I32(x) => *x as f64,
-            Types::I64(x) => *x as f64,
-            Types::I128(x) => *x as f64,
-            Types::F32(x) => *x as f64,
-            Types::F64(x) => *x as f64,
-            Types::Usize(x) => *x as f64,
-            _ => panic!("Invalid Type"),
+            Types::U8(x) => Ok(*x as f64),
+            Types::U16(x) => Ok(*x as f64),
+            Types::U32(x) => Ok(*x as f64),
+            Types::U64(x) => Ok(*x as f64),
+            Types::U128(x) => Ok(*x as f64),
+            Types::I8(x) => Ok(*x as f64),
+            Types::I16(x) => Ok(*x as f64),
+            Types::I64(x) => Ok(*x as f64),
+            Types::I128(x) => Ok(*x as f64),
+            Types::F32(x) => Ok(*x as f64),
+            Types::F64(x) => Ok(*x as f64),
+            Types::Usize(x) => Ok(*x as f64),
+            _ => Err(Types::None),
         }
     }
 
-    fn unwrap_str(&self) -> String {
+    fn unwrap_str(&self) -> Result<String, Types> {
         match self {
-            Types::String(x) => x.clone(),
-            _ => panic!("Invalid Type"),
+            Types::String(x) => Ok(x.clone()),
+            _ => Err(Types::None),
         }
     }
 
-    fn unwrap_bool(&self) -> bool {
+    fn unwrap_bool(&self) -> Result<bool, Types> {
         match self {
-            Types::Bool(x) => *x,
-            _ => panic!("Invalid Type"),
+            Types::Bool(x) => Ok(*x),
+            _ => Err(Types::None),
         }
     }
 
-    fn unwrap_vec(&self) -> Vec<Types> {
+    fn unwrap_vec(&self) -> Result<Vec<Types>, Types> {
         match self {
-            Types::Vec(x) => x.clone(),
-            _ => panic!("Invalid Type"),
+            Types::Vec(x) => Ok(x.clone()),
+            _ => Err(Types::None),
         }
     }
 }
 
-impl ExTypes for Types {
+impl ExpectTypes for Types {
     fn expect_int(&self, msg: &str) -> i128 {
         match self {
             Types::U8(x) => *x as i128,
